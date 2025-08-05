@@ -4,93 +4,158 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LLM Social Platform</title>
-  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/babel-standalone@7.22.5/babel.min.js"></script>
+  <script src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.22.5/babel.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #f0f2f5; }
+  </style>
 </head>
 <body>
   <div id="root"></div>
+  <div id="fallback" style="display: none;">Loading failed. Please check your internet or serve via a local server (e.g., npx http-server).</div>
   <script type="text/babel">
-    const { useState, useEffect } = React;
+    console.log("Script loaded, React:", typeof React, "ReactDOM:", typeof ReactDOM);
 
-    // Mock user data
+    const { useState } = React;
+
+    // Mock user data for Stories-like header
     const mockUsers = [
-      { id: 1, username: "User1", post: "Just chilling with my AI buddy!" },
-      { id: 2, username: "User2", post: "What's the future of AI? #LLM" },
+      { id: 1, username: "User1", avatar: "https://via.placeholder.com/60" },
+      { id: 2, username: "User2", avatar: "https://via.placeholder.com/60" },
+      { id: 3, username: "User3", avatar: "https://via.placeholder.com/60" },
     ];
 
-    // Mock LLM response function (replace with real API call)
-    const getLLMResponse = (input) => {
-      return `AI: You said "${input}". Here's a thoughtful response: The future of AI is bright, but it depends on how we use it responsibly.`;
-    };
+    // Mock posts for feed
+    const mockPosts = [
+      { id: 1, username: "User1", content: "Loving this AI platform! #SocialAI" },
+      { id: 2, username: "User2", content: "Just generated a post with Grok! #AI" },
+    ];
+
+    // Mock LLMs for sidebar
+    const mockLLMs = ["Grok", "GPT-4", "LLaMA"];
+
+    // Mock prompt engine functions
+    const generatePost = (input) => `Generated post: "${input}" with hashtags #AI #SocialMedia`;
+    const validatePost = (input) => input.length > 10 ? "Valid: Post is engaging and meets length requirements." : "Invalid: Post is too short.";
+    const suggestIdeas = () => ["Share your AI journey!", "Post about tech trends!", "Ask followers for AI tips!"];
+    const validateInternet = (input) => `Mock internet validation: "${input}" aligns with current trends.`;
 
     const App = () => {
-      const [userInput, setUserInput] = useState("");
-      const [chatMessages, setChatMessages] = useState([]);
+      const [promptInput, setPromptInput] = useState("");
+      const [selectedLLM, setSelectedLLM] = useState(mockLLMs[0]);
+      const [output, setOutput] = useState("");
       const [currentUser, setCurrentUser] = useState("Guest");
 
-      // Handle sending a message to the LLM
-      const handleSendMessage = () => {
-        if (userInput.trim()) {
-          const response = getLLMResponse(userInput);
-          setChatMessages([...chatMessages, { user: currentUser, text: userInput }, { user: "AI", text: response }]);
-          setUserInput("");
+      const handleGenerate = () => {
+        if (promptInput.trim()) {
+          const generated = generatePost(promptInput);
+          setOutput(generated);
         }
       };
 
-      // Handle Enter key press
+      const handleValidate = () => {
+        if (promptInput.trim()) {
+          const validation = validatePost(promptInput);
+          setOutput(validation);
+        }
+      };
+
+      const handleSuggest = () => {
+        const ideas = suggestIdeas();
+        setOutput("Suggested ideas: " + ideas.join(", "));
+      };
+
+      const handleInternetValidate = () => {
+        if (promptInput.trim()) {
+          const result = validateInternet(promptInput);
+          setOutput(result);
+        }
+      };
+
       const handleKeyPress = (e) => {
         if (e.key === "Enter") {
-          handleSendMessage();
+          handleGenerate();
         }
       };
 
       return (
         <div className="flex flex-col h-screen bg-gray-100">
-          {/* Header */}
-          <header className="bg-blue-600 text-white p-4 flex justify-between items-center">
-            <h1 className="text-2xl font-bold">LLM Social</h1>
-            <div className="text-lg">Welcome, {currentUser}</div>
-          </header>
-
-          <div className="flex flex-1 overflow-hidden">
-            {/* Social Feed */}
-            <div className="w-1/2 p-4 overflow-y-auto border-r border-gray-300">
-              <h2 className="text-xl font-semibold mb-4">Community Posts</h2>
+          {/* Stories-like Header */}
+          <header className="bg-white p-4 shadow">
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-bold">LLM Social</h1>
+              <div>Welcome, {currentUser}</div>
+            </div>
+            <div className="flex space-x-4 mt-4 overflow-x-auto">
               {mockUsers.map((user) => (
-                <div key={user.id} className="bg-white p-4 mb-4 rounded-lg shadow">
-                  <p className="font-bold">{user.username}</p>
-                  <p>{user.post}</p>
+                <div key={user.id} className="flex flex-col items-center">
+                  <img src={user.avatar} alt={user.username} className="w-16 h-16 rounded-full border-2 border-pink-500" />
+                  <span className="text-sm mt-1">{user.username}</span>
                 </div>
               ))}
             </div>
+          </header>
 
-            {/* Chat Interface */}
-            <div className="w-1/2 p-4 flex flex-col">
-              <h2 className="text-xl font-semibold mb-4">Chat with AI</h2>
-              <div className="flex-1 bg-white p-4 rounded-lg shadow overflow-y-auto">
-                {chatMessages.map((msg, index) => (
-                  <div key={index} className={`mb-2 ${msg.user === "AI" ? "text-blue-600" : "text-gray-800"}`}>
-                    <strong>{msg.user}: </strong>{msg.text}
+          <div className="flex flex-1 overflow-hidden">
+            {/* Sidebar with LLMs */}
+            <div className="w-1/4 bg-white p-4 shadow">
+              <h2 className="text-xl font-semibold mb-4">Select LLM</h2>
+              {mockLLMs.map((llm) => (
+                <button
+                  key={llm}
+                  onClick={() => setSelectedLLM(llm)}
+                  className={`w-full p-2 mb-2 rounded ${selectedLLM === llm ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+                >
+                  {llm}
+                </button>
+              ))}
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-1 flex flex-col p-4">
+              {/* Prompt Engine */}
+              <div className="bg-white p-4 rounded-lg shadow mb-4">
+                <h2 className="text-xl font-semibold mb-4">Prompt Engine (Using: {selectedLLM})</h2>
+                <div className="flex space-x-2 mb-4">
+                  <input
+                    type="text"
+                    value={promptInput}
+                    onChange={(e) => setPromptInput(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    className="flex-1 p-2 border border-gray-300 rounded focus:outline-none"
+                    placeholder="Enter your prompt..."
+                  />
+                  <button onClick={handleGenerate} className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
+                    Generate Post
+                  </button>
+                  <button onClick={handleValidate} className="bg-green-600 text-white p-2 rounded hover:bg-green-700">
+                    Validate
+                  </button>
+                  <button onClick={handleSuggest} className="bg-yellow-600 text-white p-2 rounded hover:bg-yellow-700">
+                    Suggest Ideas
+                  </button>
+                  <button onClick={handleInternetValidate} className="bg-purple-600 text-white p-2 rounded hover:bg-purple-700">
+                    Internet Validate
+                  </button>
+                </div>
+                {output && (
+                  <div className="bg-gray-50 p-4 rounded border border-gray-200">
+                    <p>{output}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Post Feed */}
+              <div className="flex-1 overflow-y-auto">
+                <h2 className="text-xl font-semibold mb-4">Post Feed</h2>
+                {mockPosts.map((post) => (
+                  <div key={post.id} className="bg-white p-4 mb-4 rounded-lg shadow">
+                    <p className="font-bold">{post.username}</p>
+                    <p>{post.content}</p>
                   </div>
                 ))}
-              </div>
-              <div className="mt-4 flex">
-                <input
-                  type="text"
-                  value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  className="flex-1 p-2 border border-gray-300 rounded-l-lg focus:outline-none"
-                  placeholder="Type your message..."
-                />
-                <button
-                  onClick={handleSendMessage}
-                  className="bg-blue-600 text-white p-2 rounded-r-lg hover:bg-blue-700"
-                >
-                  Send
-                </button>
               </div>
             </div>
           </div>
@@ -98,7 +163,31 @@
       );
     };
 
-    ReactDOM.render(<App />, document.getElementById("root"));
+    class ErrorBoundary extends React.Component {
+      state = { error: null };
+      static getDerivedStateFromError(error) {
+        return { error };
+      }
+      render() {
+        if (this.state.error) {
+          return <h1>Error: {this.state.error.message}</h1>;
+        }
+        return this.props.children;
+      }
+    }
+
+    try {
+      ReactDOM.render(
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>,
+        document.getElementById("root")
+      );
+      document.getElementById("fallback").style.display = "none";
+    } catch (e) {
+      console.error("Render failed:", e);
+      document.getElementById("fallback").style.display = "block";
+    }
   </script>
 </body>
 </html>
