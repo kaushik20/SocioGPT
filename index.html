@@ -28,10 +28,13 @@
       { id: 3, username: "User3", avatar: generateAvatarUrl("User3"), hasStory: true },
     ];
 
-    // Mock posts for feed
+    // Mock posts for feed (expanded for testing scrolling)
     const mockPosts = [
       { id: 1, username: "User1", content: "Loving this AI platform! #SocialAI" },
       { id: 2, username: "User2", content: "Just generated a post with Grok! #AI" },
+      { id: 3, username: "User3", content: "Exploring new AI features today! #Tech" },
+      { id: 4, username: "User1", content: "Great community here! #SocioGPT" },
+      { id: 5, username: "User2", content: "AI is the future! #Innovation" },
     ];
 
     // Mock LLMs for sidebar
@@ -76,9 +79,9 @@
       };
 
       return (
-        <div className="flex flex-col h-screen bg-gray-900 text-white">
+        <div className="flex flex-col bg-gray-900 text-white">
           {/* Stories Section at Top */}
-          <div className="p-4 shadow">
+          <div className="p-4 shadow sticky top-0 bg-gray-900 z-10">
             <div className="flex justify-between items-center mb-4">
               <h1 className="text-2xl font-bold">Socio GPT</h1>
               <div className="text-lg">Welcome, {currentUser}</div>
@@ -99,7 +102,7 @@
           </div>
 
           {/* Main Content with Sidebar and Center Panel */}
-          <div className="flex flex-1 overflow-hidden mt-4">
+          <div className="flex flex-1 overflow-hidden">
             {/* Sidebar for LLM Selection */}
             <div className="w-1/4 bg-gray-800 p-4 rounded-r-lg shadow">
               <h2 className="text-xl font-semibold mb-4">Select LLM</h2>
@@ -115,7 +118,7 @@
             </div>
 
             {/* Center Panel with Post Feed and Prompt Engine */}
-            <div className="flex-1 flex flex-col items-center p-4">
+            <div className="flex-1 flex flex-col items-center p-4 overflow-y-auto">
               {/* Post Feed */}
               <div className="w-1/2 bg-gray-800 p-4 rounded-lg shadow mb-4">
                 <h2 className="text-xl font-semibold mb-4">Post Feed</h2>
