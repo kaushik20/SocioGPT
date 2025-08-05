@@ -9,12 +9,12 @@
   <script src="https://unpkg.com/@babel/standalone@7.22.5/babel.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { background-color: #f0f2f5; }
+    body { background-color: #1a202c; }
   </style>
 </head>
 <body>
   <div id="root"></div>
-  <div id="fallback" style="display: none;">Loading failed. Please check your internet or serve via a local server.</div>
+  <div id="fallback" style="display: none; color: white;">Loading failed. Please check your internet or serve via a local server.</div>
   <script type="text/babel">
     console.log("Script loaded, React:", typeof React, "ReactDOM:", typeof ReactDOM);
 
@@ -28,107 +28,104 @@
       { id: 3, username: "User3", avatar: generateAvatarUrl("User3"), hasStory: true },
     ];
 
-    // Mock posts for feed
-    const mockPosts = [
+    // Mock posts for feed (updated with prompt results)
+    const [mockPosts, setMockPosts] = useState([
       { id: 1, username: "User1", content: "Loving this AI platform! #SocialAI" },
       { id: 2, username: "User2", content: "Just generated a post with Grok! #AI" },
-    ];
+    ]);
 
     // Mock LLMs for sidebar
     const mockLLMs = ["Grok", "GPT-4", "LLaMA"];
 
     // Mock prompt engine functions
-    const generatePost = (input) => `Generated post: "${input}" with hashtags #AI #SocialMedia`;
-    const validatePost = (input) => input.length > 10 ? "Valid: Post is engaging and meets length requirements." : "Invalid: Post is too short.";
-    const suggestIdeas = () => ["Share your AI journey!", "Post about tech trends!", "Ask followers for AI tips!"];
-    const validateInternet = (input) => `Mock internet validation: "${input}" aligns with current trends.`;
+    const generatePost = (input) => `Generated: "${input}" #AI #SocialMedia`;
+    const validatePost = (input) => input.length > 10 ? "Valid: Engaging." : "Invalid: Too short.";
+    const suggestIdeas = () => ["Share your AI journey!", "Post about tech trends!", "Ask for AI tips!"];
+    const validateInternet = (input) => `Validated: "${input}" matches trends.`;
 
     const App = () => {
       const [promptInput, setPromptInput] = useState("");
       const [selectedLLM, setSelectedLLM] = useState(mockLLMs[2]); // Default to LLaMA
-      const [output, setOutput] = useState("");
       const [currentUser, setCurrentUser] = useState("Guest");
 
-      // Mock login to generate avatar
       useEffect(() => {
         if (!currentUser || currentUser === "Guest") {
-          const newUser = mockUsers[0].username; // Simulate login with first user
-          setCurrentUser(newUser);
+          setCurrentUser(mockUsers[0].username); // Simulate login with User1
         }
       }, [currentUser]);
 
       const handleGenerate = () => {
         if (promptInput.trim()) {
-          const generated = generatePost(promptInput);
-          setOutput(generated);
+          const newPost = { id: Date.now(), username: currentUser, content: generatePost(promptInput) };
+          setMockPosts([newPost, ...mockPosts]);
+          setPromptInput("");
         }
       };
 
       const handleValidate = () => {
         if (promptInput.trim()) {
-          const validation = validatePost(promptInput);
-          setOutput(validation);
+          alert(validatePost(promptInput)); // Temporary feedback
+          setPromptInput("");
         }
       };
 
       const handleSuggest = () => {
-        const ideas = suggestIdeas();
-        setOutput("Suggested ideas: " + ideas.join(", "));
+        alert("Suggestions: " + suggestIdeas().join(", ")); // Temporary feedback
       };
 
       const handleInternetValidate = () => {
         if (promptInput.trim()) {
-          const result = validateInternet(promptInput);
-          setOutput(result);
+          alert(validateInternet(promptInput)); // Temporary feedback
+          setPromptInput("");
         }
       };
 
       const handleKeyPress = (e) => {
-        if (e.key === "Enter") {
-          handleGenerate();
-        }
+        if (e.key === "Enter") handleGenerate();
       };
 
       return (
-        <div className="flex flex-col h-screen bg-gray-100">
+        <div className="flex flex-col h-screen bg-gray-900 text-white">
           {/* Header with Stories-like display */}
-          <header className="bg-gray-900 p-4 shadow text-white flex justify-between items-center">
-            <h1 className="text-2xl font-bold">Socio GPT</h1>
-            <div className="text-lg">Welcome, {currentUser}</div>
-          </header>
-          <div className="flex flex-1 overflow-hidden mt-4">
-            {/* Stories-like Header Row */}
-            <div className="flex space-x-4 p-4 overflow-x-auto bg-gray-900 shadow">
+          <header className="bg-gray-900 p-4 shadow">
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-bold">Socio GPT</h1>
+              <div className="text-lg">Welcome, {currentUser}</div>
+            </div>
+            <div className="flex space-x-4 p-4 overflow-x-auto bg-gray-900">
               {mockUsers.map((user) => (
                 <div key={user.id} className="flex flex-col items-center">
                   <img
                     src={user.avatar}
                     alt={user.username}
-                    className={`w-16 h-16 rounded-full ${user.hasStory ? "border-4 border-pink-500" : "border-2 border-gray-300"}`}
+                    className={`w-16 h-16 rounded-full ${user.hasStory ? "border-4 border-pink-500" : "border-2 border-gray-600"}`}
+                    onError={(e) => { e.target.src = "https://via.placeholder.com/60"; }}
                   />
-                  <span className="text-sm mt-1 text-white">{user.username}</span>
+                  <span className="text-sm mt-1">{user.username}</span>
                 </div>
+              ))}
+            </div>
+          </header>
+
+          <div className="flex flex-1 overflow-hidden mt-4">
+            {/* Sidebar for LLM Selection */}
+            <div className="w-1/4 bg-gray-800 p-4 rounded-lg shadow mr-4">
+              <h2 className="text-xl font-semibold mb-4">Select LLM</h2>
+              {mockLLMs.map((llm) => (
+                <button
+                  key={llm}
+                  onClick={() => setSelectedLLM(llm)}
+                  className={`w-full p-2 mb-2 rounded ${selectedLLM === llm ? "bg-blue-600" : "bg-gray-700"} text-white`}
+                >
+                  {llm}
+                </button>
               ))}
             </div>
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col items-center p-4">
-              {/* Sidebar for LLM Selection */}
-              <div className="w-1/4 bg-white p-4 rounded-lg shadow mr-4">
-                <h2 className="text-xl font-semibold mb-4">Select LLM</h2>
-                {mockLLMs.map((llm) => (
-                  <button
-                    key={llm}
-                    onClick={() => setSelectedLLM(llm)}
-                    className={`w-full p-2 mb-2 rounded ${selectedLLM === llm ? "bg-blue-600 text-white" : "bg-gray-200"}`}
-                  >
-                    {llm}
-                  </button>
-                ))}
-              </div>
-
               {/* Prompt Engine */}
-              <div className="w-1/2 bg-gray-100 p-6 rounded-lg shadow mt-4">
+              <div className="w-1/2 bg-gray-800 p-6 rounded-lg shadow mb-4">
                 <h2 className="text-xl font-semibold mb-4">Prompt Engine (Using: {selectedLLM})</h2>
                 <div className="mb-4">
                   <input
@@ -136,40 +133,39 @@
                     value={promptInput}
                     onChange={(e) => setPromptInput(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    className="w-full p-2 border border-gray-300 rounded focus:outline-none"
+                    className="w-full p-2 border border-gray-600 rounded bg-gray-900 text-white focus:outline-none"
                     placeholder="Enter your prompt..."
                   />
                 </div>
                 <div className="flex space-x-2 justify-center">
-                  <button onClick={handleGenerate} className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
+                  <button onClick={handleGenerate} className="bg-blue-600 p-2 rounded hover:bg-blue-700">
                     Generate Post
                   </button>
-                  <button onClick={handleValidate} className="bg-green-600 text-white p-2 rounded hover:bg-green-700">
+                  <button onClick={handleValidate} className="bg-green-600 p-2 rounded hover:bg-green-700">
                     Validate
                   </button>
-                  <button onClick={handleSuggest} className="bg-yellow-600 text-white p-2 rounded hover:bg-yellow-700">
+                  <button onClick={handleSuggest} className="bg-yellow-600 p-2 rounded hover:bg-yellow-700">
                     Suggest Ideas
                   </button>
-                  <button onClick={handleInternetValidate} className="bg-purple-600 text-white p-2 rounded hover:bg-purple-700">
+                  <button onClick={handleInternetValidate} className="bg-purple-600 p-2 rounded hover:bg-purple-700">
                     Internet Validate
                   </button>
                 </div>
-                {output && (
-                  <div className="mt-4 p-4 bg-white rounded border border-gray-200">
-                    <p>{output}</p>
-                  </div>
-                )}
               </div>
 
-              {/* Post Feed */}
-              <div className="w-1/2 mt-4 bg-white p-4 rounded-lg shadow">
-                <h2 className="text-xl font-semibold mb-4">Post Feed</h2>
-                {mockPosts.map((post) => (
-                  <div key={post.id} className="mb-4 p-4 bg-gray-50 rounded">
-                    <p className="font-bold">{post.username}</p>
-                    <p>{post.content}</p>
-                  </div>
-                ))}
+              {/* Post Feed (replacing output) */}
+              <div className="w-1/2 bg-gray-800 p-4 rounded-lg shadow">
+                <h2 className="text-xl font-semibold mb-4">Posts</h2>
+                {mockPosts.length === 0 ? (
+                  <p className="text-gray-400">No posts yet. Generate one!</p>
+                ) : (
+                  mockPosts.map((post) => (
+                    <div key={post.id} className="mb-4 p-4 bg-gray-700 rounded">
+                      <p className="font-bold">{post.username}</p>
+                      <p>{post.content}</p>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -179,22 +175,13 @@
 
     class ErrorBoundary extends React.Component {
       state = { error: null };
-      static getDerivedStateFromError(error) {
-        return { error };
-      }
-      render() {
-        if (this.state.error) {
-          return <h1>Error: {this.state.error.message}</h1>;
-        }
-        return this.props.children;
-      }
+      static getDerivedStateFromError(error) { return { error }; }
+      render() { return this.state.error ? <h1>Error: {this.state.error.message}</h1> : this.props.children; }
     }
 
     try {
       ReactDOM.render(
-        <ErrorBoundary>
-          <App />
-        </ErrorBoundary>,
+        <ErrorBoundary><App /></ErrorBoundary>,
         document.getElementById("root")
       );
       document.getElementById("fallback").style.display = "none";
