@@ -28,24 +28,25 @@
       { id: 3, username: "User3", avatar: generateAvatarUrl("User3"), hasStory: true },
     ];
 
-    // Mock posts for feed (updated with prompt results)
-    const [mockPosts, setMockPosts] = useState([
+    // Mock posts for feed
+    const mockPosts = [
       { id: 1, username: "User1", content: "Loving this AI platform! #SocialAI" },
       { id: 2, username: "User2", content: "Just generated a post with Grok! #AI" },
-    ]);
+    ];
 
     // Mock LLMs for sidebar
     const mockLLMs = ["Grok", "GPT-4", "LLaMA"];
 
     // Mock prompt engine functions
-    const generatePost = (input) => `Generated: "${input}" #AI #SocialMedia`;
-    const validatePost = (input) => input.length > 10 ? "Valid: Engaging." : "Invalid: Too short.";
+    const generatePost = (input) => `Generated post: "${input}" with hashtags #AI #SocialMedia`;
+    const validatePost = (input) => input.length > 10 ? "Valid: Post is engaging." : "Invalid: Too short.";
     const suggestIdeas = () => ["Share your AI journey!", "Post about tech trends!", "Ask for AI tips!"];
-    const validateInternet = (input) => `Validated: "${input}" matches trends.`;
+    const validateInternet = (input) => `Validation: "${input}" matches current trends.`;
 
     const App = () => {
       const [promptInput, setPromptInput] = useState("");
       const [selectedLLM, setSelectedLLM] = useState(mockLLMs[2]); // Default to LLaMA
+      const [output, setOutput] = useState("");
       const [currentUser, setCurrentUser] = useState("Guest");
 
       useEffect(() => {
@@ -55,29 +56,19 @@
       }, [currentUser]);
 
       const handleGenerate = () => {
-        if (promptInput.trim()) {
-          const newPost = { id: Date.now(), username: currentUser, content: generatePost(promptInput) };
-          setMockPosts([newPost, ...mockPosts]);
-          setPromptInput("");
-        }
+        if (promptInput.trim()) setOutput(generatePost(promptInput));
       };
 
       const handleValidate = () => {
-        if (promptInput.trim()) {
-          alert(validatePost(promptInput)); // Temporary feedback
-          setPromptInput("");
-        }
+        if (promptInput.trim()) setOutput(validatePost(promptInput));
       };
 
       const handleSuggest = () => {
-        alert("Suggestions: " + suggestIdeas().join(", ")); // Temporary feedback
+        setOutput("Ideas: " + suggestIdeas().join(", "));
       };
 
       const handleInternetValidate = () => {
-        if (promptInput.trim()) {
-          alert(validateInternet(promptInput)); // Temporary feedback
-          setPromptInput("");
-        }
+        if (promptInput.trim()) setOutput(validateInternet(promptInput));
       };
 
       const handleKeyPress = (e) => {
@@ -86,13 +77,13 @@
 
       return (
         <div className="flex flex-col h-screen bg-gray-900 text-white">
-          {/* Header with Stories-like display */}
-          <header className="bg-gray-900 p-4 shadow">
-            <div className="flex justify-between items-center">
+          {/* Stories Section at Top */}
+          <div className="p-4 shadow">
+            <div className="flex justify-between items-center mb-4">
               <h1 className="text-2xl font-bold">Socio GPT</h1>
               <div className="text-lg">Welcome, {currentUser}</div>
             </div>
-            <div className="flex space-x-4 p-4 overflow-x-auto bg-gray-900">
+            <div className="flex space-x-4 overflow-x-auto bg-gray-800 p-2 rounded">
               {mockUsers.map((user) => (
                 <div key={user.id} className="flex flex-col items-center">
                   <img
@@ -105,11 +96,12 @@
                 </div>
               ))}
             </div>
-          </header>
+          </div>
 
+          {/* Main Content with Sidebar and Center Panel */}
           <div className="flex flex-1 overflow-hidden mt-4">
             {/* Sidebar for LLM Selection */}
-            <div className="w-1/4 bg-gray-800 p-4 rounded-lg shadow mr-4">
+            <div className="w-1/4 bg-gray-800 p-4 rounded-r-lg shadow">
               <h2 className="text-xl font-semibold mb-4">Select LLM</h2>
               {mockLLMs.map((llm) => (
                 <button
@@ -122,7 +114,7 @@
               ))}
             </div>
 
-            {/* Main Content */}
+            {/* Center Panel with Prompt Engine and Feed */}
             <div className="flex-1 flex flex-col items-center p-4">
               {/* Prompt Engine */}
               <div className="w-1/2 bg-gray-800 p-6 rounded-lg shadow mb-4">
@@ -151,21 +143,22 @@
                     Internet Validate
                   </button>
                 </div>
+                {output && (
+                  <div className="mt-4 p-4 bg-gray-700 rounded border border-gray-600">
+                    <p>{output}</p>
+                  </div>
+                )}
               </div>
 
-              {/* Post Feed (replacing output) */}
+              {/* Post Feed */}
               <div className="w-1/2 bg-gray-800 p-4 rounded-lg shadow">
-                <h2 className="text-xl font-semibold mb-4">Posts</h2>
-                {mockPosts.length === 0 ? (
-                  <p className="text-gray-400">No posts yet. Generate one!</p>
-                ) : (
-                  mockPosts.map((post) => (
-                    <div key={post.id} className="mb-4 p-4 bg-gray-700 rounded">
-                      <p className="font-bold">{post.username}</p>
-                      <p>{post.content}</p>
-                    </div>
-                  ))
-                )}
+                <h2 className="text-xl font-semibold mb-4">Post Feed</h2>
+                {mockPosts.map((post) => (
+                  <div key={post.id} className="mb-4 p-4 bg-gray-700 rounded">
+                    <p className="font-bold">{post.username}</p>
+                    <p>{post.content}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -180,10 +173,7 @@
     }
 
     try {
-      ReactDOM.render(
-        <ErrorBoundary><App /></ErrorBoundary>,
-        document.getElementById("root")
-      );
+      ReactDOM.render(<ErrorBoundary><App /></ErrorBoundary>, document.getElementById("root"));
       document.getElementById("fallback").style.display = "none";
     } catch (e) {
       console.error("Render failed:", e);
