@@ -114,10 +114,21 @@
               ))}
             </div>
 
-            {/* Center Panel with Prompt Engine and Feed */}
+            {/* Center Panel with Post Feed and Prompt Engine */}
             <div className="flex-1 flex flex-col items-center p-4">
+              {/* Post Feed */}
+              <div className="w-1/2 bg-gray-800 p-4 rounded-lg shadow mb-4">
+                <h2 className="text-xl font-semibold mb-4">Post Feed</h2>
+                {mockPosts.map((post) => (
+                  <div key={post.id} className="mb-4 p-4 bg-gray-700 rounded">
+                    <p className="font-bold">{post.username}</p>
+                    <p>{post.content}</p>
+                  </div>
+                ))}
+              </div>
+
               {/* Prompt Engine */}
-              <div className="w-1/2 bg-gray-800 p-6 rounded-lg shadow mb-4">
+              <div className="w-1/2 bg-gray-800 p-6 rounded-lg shadow">
                 <h2 className="text-xl font-semibold mb-4">Prompt Engine (Using: {selectedLLM})</h2>
                 <div className="mb-4">
                   <input
@@ -148,17 +159,6 @@
                     <p>{output}</p>
                   </div>
                 )}
-              </div>
-
-              {/* Post Feed */}
-              <div className="w-1/2 bg-gray-800 p-4 rounded-lg shadow">
-                <h2 className="text-xl font-semibold mb-4">Post Feed</h2>
-                {mockPosts.map((post) => (
-                  <div key={post.id} className="mb-4 p-4 bg-gray-700 rounded">
-                    <p className="font-bold">{post.username}</p>
-                    <p>{post.content}</p>
-                  </div>
-                ))}
               </div>
             </div>
           </div>
