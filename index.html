@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LLM Social Platform</title>
+  <title>Socio GPT</title>
   <script src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone@7.22.5/babel.min.js"></script>
@@ -14,17 +14,18 @@
 </head>
 <body>
   <div id="root"></div>
-  <div id="fallback" style="display: none;">Loading failed. Please check your internet or serve via a local server (e.g., npx http-server).</div>
+  <div id="fallback" style="display: none;">Loading failed. Please check your internet or serve via a local server.</div>
   <script type="text/babel">
     console.log("Script loaded, React:", typeof React, "ReactDOM:", typeof ReactDOM);
 
-    const { useState } = React;
+    const { useState, useEffect } = React;
 
-    // Mock user data for Stories-like header
+    // Mock user data with generated avatar URLs and story status
+    const generateAvatarUrl = (username) => `https://api.dicebear.com/6.x/adventurer/svg?seed=${username}`;
     const mockUsers = [
-      { id: 1, username: "User1", avatar: "https://via.placeholder.com/60" },
-      { id: 2, username: "User2", avatar: "https://via.placeholder.com/60" },
-      { id: 3, username: "User3", avatar: "https://via.placeholder.com/60" },
+      { id: 1, username: "User1", avatar: generateAvatarUrl("User1"), hasStory: true },
+      { id: 2, username: "User2", avatar: generateAvatarUrl("User2"), hasStory: false },
+      { id: 3, username: "User3", avatar: generateAvatarUrl("User3"), hasStory: true },
     ];
 
     // Mock posts for feed
@@ -44,9 +45,17 @@
 
     const App = () => {
       const [promptInput, setPromptInput] = useState("");
-      const [selectedLLM, setSelectedLLM] = useState(mockLLMs[0]);
+      const [selectedLLM, setSelectedLLM] = useState(mockLLMs[2]); // Default to LLaMA
       const [output, setOutput] = useState("");
       const [currentUser, setCurrentUser] = useState("Guest");
+
+      // Mock login to generate avatar
+      useEffect(() => {
+        if (!currentUser || currentUser === "Guest") {
+          const newUser = mockUsers[0].username; // Simulate login with first user
+          setCurrentUser(newUser);
+        }
+      }, [currentUser]);
 
       const handleGenerate = () => {
         if (promptInput.trim()) {
@@ -82,51 +91,56 @@
 
       return (
         <div className="flex flex-col h-screen bg-gray-100">
-          {/* Stories-like Header */}
-          <header className="bg-white p-4 shadow">
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold">Socio GPT</h1>
-              <div>Welcome, {currentUser}</div>
-            </div>
-            <div className="flex space-x-4 mt-4 overflow-x-auto">
+          {/* Header with Stories-like display */}
+          <header className="bg-gray-900 p-4 shadow text-white flex justify-between items-center">
+            <h1 className="text-2xl font-bold">Socio GPT</h1>
+            <div className="text-lg">Welcome, {currentUser}</div>
+          </header>
+          <div className="flex flex-1 overflow-hidden mt-4">
+            {/* Stories-like Header Row */}
+            <div className="flex space-x-4 p-4 overflow-x-auto bg-gray-900 shadow">
               {mockUsers.map((user) => (
                 <div key={user.id} className="flex flex-col items-center">
-                  <img src={user.avatar} alt={user.username} className="w-16 h-16 rounded-full border-2 border-pink-500" />
-                  <span className="text-sm mt-1">{user.username}</span>
+                  <img
+                    src={user.avatar}
+                    alt={user.username}
+                    className={`w-16 h-16 rounded-full ${user.hasStory ? "border-4 border-pink-500" : "border-2 border-gray-300"}`}
+                  />
+                  <span className="text-sm mt-1 text-white">{user.username}</span>
                 </div>
-              ))}
-            </div>
-          </header>
-
-          <div className="flex flex-1 overflow-hidden">
-            {/* Sidebar with LLMs */}
-            <div className="w-1/4 bg-white p-4 shadow">
-              <h2 className="text-xl font-semibold mb-4">Select LLM</h2>
-              {mockLLMs.map((llm) => (
-                <button
-                  key={llm}
-                  onClick={() => setSelectedLLM(llm)}
-                  className={`w-full p-2 mb-2 rounded ${selectedLLM === llm ? "bg-blue-600 text-white" : "bg-gray-200"}`}
-                >
-                  {llm}
-                </button>
               ))}
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col p-4">
+            <div className="flex-1 flex flex-col items-center p-4">
+              {/* Sidebar for LLM Selection */}
+              <div className="w-1/4 bg-white p-4 rounded-lg shadow mr-4">
+                <h2 className="text-xl font-semibold mb-4">Select LLM</h2>
+                {mockLLMs.map((llm) => (
+                  <button
+                    key={llm}
+                    onClick={() => setSelectedLLM(llm)}
+                    className={`w-full p-2 mb-2 rounded ${selectedLLM === llm ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+                  >
+                    {llm}
+                  </button>
+                ))}
+              </div>
+
               {/* Prompt Engine */}
-              <div className="bg-white p-4 rounded-lg shadow mb-4">
+              <div className="w-1/2 bg-gray-100 p-6 rounded-lg shadow mt-4">
                 <h2 className="text-xl font-semibold mb-4">Prompt Engine (Using: {selectedLLM})</h2>
-                <div className="flex space-x-2 mb-4">
+                <div className="mb-4">
                   <input
                     type="text"
                     value={promptInput}
                     onChange={(e) => setPromptInput(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    className="flex-1 p-2 border border-gray-300 rounded focus:outline-none"
+                    className="w-full p-2 border border-gray-300 rounded focus:outline-none"
                     placeholder="Enter your prompt..."
                   />
+                </div>
+                <div className="flex space-x-2 justify-center">
                   <button onClick={handleGenerate} className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
                     Generate Post
                   </button>
@@ -141,17 +155,17 @@
                   </button>
                 </div>
                 {output && (
-                  <div className="bg-gray-50 p-4 rounded border border-gray-200">
+                  <div className="mt-4 p-4 bg-white rounded border border-gray-200">
                     <p>{output}</p>
                   </div>
                 )}
               </div>
 
               {/* Post Feed */}
-              <div className="flex-1 overflow-y-auto">
+              <div className="w-1/2 mt-4 bg-white p-4 rounded-lg shadow">
                 <h2 className="text-xl font-semibold mb-4">Post Feed</h2>
                 {mockPosts.map((post) => (
-                  <div key={post.id} className="bg-white p-4 mb-4 rounded-lg shadow">
+                  <div key={post.id} className="mb-4 p-4 bg-gray-50 rounded">
                     <p className="font-bold">{post.username}</p>
                     <p>{post.content}</p>
                   </div>
